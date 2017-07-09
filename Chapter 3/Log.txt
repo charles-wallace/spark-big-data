@@ -1,0 +1,66 @@
+
+
+/**
+	########################
+	## Preparing the Data ##
+	########################
+*/
+
+/** 01) Started spark-shell with: spark-shell --master local[*] --driver-memory 6g */
+/**
+	02) Determine that id's are no large than the Integer.MAX_VALUE, or 2147483647
+		
+		a) Access the file as an RDD of Strings in Spark with SparkContext’s textFile method: val rawUserArtistData = sc.textFile("profiledata_06-May-2005/user_artist_data.txt")
+		b) Compute statistics on the user ID and artist IDs: 
+		   rawUserArtistData.map(_.split(' ')(0).toDouble).stats() 
+		   rawUserArtistData.map(_.split(' ')(1).toDouble).stats()
+*/
+/**
+	03) numeric IDs in the artist_data.txt file:
+		val rawArtistData = sc.textFile("profiledata_06-May-2005/artist_data.txt")
+		/**
+			span() splits the line by its first tab by consuming characters that 
+			aren’t tabs, then parses the first portion as the numeric artist ID, and retains the rest as the artist name (with whitespace—the tab—removed).
+		*/
+		val artistByID = rawArtistData.map { line =>
+			val (id, name) = line.span(_ != '\t')
+      		(id.toInt, name.trim)
+    	}
+*/
+
+/**
+	04) 
+		a) The flatMap() function is appropriate when each element maps to zero, one, or more results, because it simply “flattens” these collec‐ tions of zero or more results from each input into one big RDD/
+		b) Option represents a value that might only optionally exist. It is like a simple collection of 1 or 0 values, corresponding to its Some and None subclasses.
+		c) while the function in flatMap in the following code could just as easily return an empty List, or a List of one element, this is a reason‐ able place to instead use the simpler and clearer Some and None:
+
+		val artistByID = rawArtistData.flatMap { line => 
+			val (id, name) = line.span(_ != '\t')
+			if (name.isEmpty) {
+				None
+			}else{ 
+				try {
+					Some((id.toInt, name.trim)) 
+				} catch {
+					case e: NumberFormatException => None 
+				}
+			} 
+		}
+*/
+
+/** 
+	05) Building the model with ALS.trainimplicit
+		a) import org.apache.spark.mllib.recommendation._
+		b) val model = ALS.trainImplicit(trainData, 10, 5, 0.01, 1.0)
+*/
+
+
+
+
+
+
+
+
+
+
+
